@@ -1,10 +1,8 @@
 import boto3
 import time
 
-
 awsAccessKeyID = input("AWS Access Key: ")
 awsSecretAccessKey = input("AWS Secret Access Key: ")
-
 
 s3 = boto3.client(
     's3',
@@ -12,7 +10,6 @@ s3 = boto3.client(
     aws_secret_access_key=awsSecretAccessKey,
     region_name='eu-central-1'
 )
-
 
 response = s3.list_buckets()
 
@@ -22,7 +19,6 @@ if 'Buckets' in response and len(response['Buckets']) > 0:
         print(f" - {bucket['Name']}")
 else:
     print("No buckets found")
-
 
 #----------------Upload Function
 def upload_file_to_s3(file_name, bucket, object_name=None):
@@ -35,7 +31,6 @@ def upload_file_to_s3(file_name, bucket, object_name=None):
     
     except Exception as e:
         print(f"Error: {str(e)}")
-
 
 #--------------List objects function
 def list_objects_in_bucket(bucket_name):
@@ -50,8 +45,6 @@ def list_objects_in_bucket(bucket_name):
     except Exception as e:
         print(f"Error: {str(e)}")
 
-
-
 #------------Download Function
 def download_file_from_s3(bucket, object_name, local_path):
     try:
@@ -61,13 +54,21 @@ def download_file_from_s3(bucket, object_name, local_path):
     except Exception as e:
         print(f"Error: {str(e)}")
 
-
+#------------Delete Function
+def delete_file_from_s3(bucket, object_name):
+    try:
+        # Use keyword arguments for Bucket and Key
+        s3.delete_object(Bucket=bucket, Key=object_name)
+        print(f"Object {object_name} successfully deleted from bucket {bucket}.")
+    
+    except Exception as e:
+        print(f"Error: {str(e)}")
 
 #------------Start
 while True:
     operationNumber = None
-    while operationNumber not in ['1', '2', 'q']:  
-        operationNumber = input("Choose an operation (Type 1, 2 or q to quit):\n(1) Upload File\n(2) Download File\n(q) Quit\n")
+    while operationNumber not in ['1', '2', '3', '4', 'q']:  
+        operationNumber = input("Choose an operation (Type 1, 2, 3 or q to quit):\n(1) Upload File\n(2) Download File\n(3) Delete File\n(4) List objects in bucket\n(q) Quit\n")
 
     if operationNumber == '1':
         print("Upload File")
@@ -78,6 +79,7 @@ while True:
         object_name = input("File name which will appear in bucket: ")
 
         upload_file_to_s3(file_name, bucket, object_name)
+        time.sleep(3)
 
     elif operationNumber == '2':
         print("Download File")
@@ -87,10 +89,41 @@ while True:
         list_objects_in_bucket(bucket)  
         
         object_name = input("Which file do you want to download (type the exact file name)? ")
-        local_path = input("Path where you want to download the file: ") + "\\" +object_name
+        local_path = input("Path where you want to download the file: ") + "\\" + object_name
 
         download_file_from_s3(bucket, object_name, local_path)
-    
+        time.sleep(3)
+        
+
+    elif operationNumber == '3':
+        print("Delete File")
+        time.sleep(0.5)
+        
+        bucket = input("Bucket name: ")
+        list_objects_in_bucket(bucket)
+
+        while True:
+            object_name = input("Which file do you want to delete (type the exact file name)? ")
+
+            confirm = input("Please write the file name again to confirm: ")
+            if confirm == object_name:
+                delete_file_from_s3(bucket, object_name)
+                break
+                time.sleep(3)
+
+            else:
+                print("You wrote wrong")
+                time.sleep(0.5)
+
+
+    elif operationNumber == '4':
+        bucket = input("Bucket name:")
+        list_objects_in_bucket(bucket)
+        time.sleep(3)
+
+
+
+
     elif operationNumber == 'q':
         print("Exiting the program...")
         break  
