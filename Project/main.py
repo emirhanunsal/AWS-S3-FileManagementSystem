@@ -57,18 +57,31 @@ def download_file_from_s3(bucket, object_name, local_path):
 #------------Delete Function
 def delete_file_from_s3(bucket, object_name):
     try:
-        # Use keyword arguments for Bucket and Key
         s3.delete_object(Bucket=bucket, Key=object_name)
         print(f"Object {object_name} successfully deleted from bucket {bucket}.")
     
     except Exception as e:
         print(f"Error: {str(e)}")
 
+
+#-------------Create Bucket
+def create_s3_bucket(bucket_name):
+    try:
+        response = s3.create_bucket(
+            Bucket=bucket_name,
+            CreateBucketConfiguration={
+                'LocationConstraint': 'eu-central-1'  
+            }
+        )
+        print(f"Bucket '{bucket_name}' created successfully.")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+
 #------------Start
 while True:
     operationNumber = None
-    while operationNumber not in ['1', '2', '3', '4', 'q']:  
-        operationNumber = input("Choose an operation (Type 1, 2, 3 or q to quit):\n(1) Upload File\n(2) Download File\n(3) Delete File\n(4) List objects in bucket\n(q) Quit\n")
+    while operationNumber not in ['1', '2', '3', '4', '5', 'q']:  
+        operationNumber = input("Choose an operation (Type 1, 2, 3, 4, 5 or q to quit):\n(1) Upload File\n(2) Download File\n(3) Delete File\n(4) List objects in bucket\n(5) Create new bucket\n(q) Quit\n")
 
     if operationNumber == '1':
         print("Upload File")
@@ -122,7 +135,10 @@ while True:
         time.sleep(3)
 
 
-
+    elif operationNumber == '5':
+        bucket = input("Write the bucket name you want to create: ")
+        create_s3_bucket(bucket)
+        
 
     elif operationNumber == 'q':
         print("Exiting the program...")
